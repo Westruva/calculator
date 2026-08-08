@@ -17,48 +17,107 @@ function divide (a, b) {
     return a / b;
 }
 
-let firstNumber;
-let secondNumber;
-let operation;
+//MY VARIABLES
+let firstNumber = '';
+let secondNumber = '';
+let operation = '';
 
 function operate() {
-    // takes two numbers and an operator as and calls one of the above functions on the numbers based on the operator.
+    // takes two numbers and an operator and calls one of the above functions on the numbers based on the operator.
     switch (operation) {
         case "add":
-            return add(firstNumber, secondNumber);
+            return add(Number(firstNumber), Number(secondNumber));
         case "subtract":
-            return subtract(firstNumber, secondNumber);
+            return subtract(Number(firstNumber), Number(secondNumber));
         case "multiply":
-            return multiply(firstNumber, secondNumber);
+            return multiply(Number(firstNumber), Number(secondNumber));
         case "divide":
-            return divide(firstNumber, secondNumber);
+            return divide(Number(firstNumber), Number(secondNumber));
         default:
             throw new Error("Invalid operation");
     }
 }
 
-//function to handle button clicks and update the display
-function handleButtonClick(value) {
-    // Implementation for handling button clicks
-    console.log("Button clicked:", value);
-}
-
-const container = document.querySelector('#buttons-container'); // or document.body
-
-container.addEventListener('click', (event) => {
-  const button = event.target.closest('button');
-  if (!button) return;
-
-  console.log('Button pressed:', button.textContent);
-  handleButtonClick(button.textContent);
-  updateDisplay(button.textContent);
-  firstNumber = parseFloat(button.textContent); // Example of setting firstNumber, you may want to adjust this logic based on your calculator's state
-  console.log(firstNumber);
-
-});
-
 function updateDisplay(value) {
     const display = document.querySelector('#display');
     display.textContent = value;
 }
+
+function getOperatorName(symbol) {
+    switch (symbol) {
+        case '+':
+            return 'add';
+        case '-':
+            return 'subtract';
+        case 'x':
+            return 'multiply';
+        case '÷':
+            return 'divide';
+        default:
+            return '';
+    }
+}
+
+function appendValue(current, value) {
+    if (value === '.' && current.includes('.')) {
+        return current;
+    }
+    return current + value;
+}
+
+function updateCalculatorVariables(value) {
+    if (value === 'clear') {
+        firstNumber = '';
+        secondNumber = '';
+        operation = '';
+        updateDisplay('0');
+        return;
+    }
+
+    if (value === '=') {
+        if (firstNumber !== '' && operation !== '' && secondNumber !== '') {
+            const result = operate();
+            firstNumber = String(result);
+            secondNumber = '';
+            operation = '';
+            updateDisplay(result);
+        }
+        return;
+    }
+
+    const operatorName = getOperatorName(value);
+    if (operatorName !== '') {
+        if (firstNumber === '') {
+            return;
+        }
+        if (secondNumber !== '') {
+            const result = operate();
+            firstNumber = String(result);
+            secondNumber = '';
+            updateDisplay(result);
+        }
+        operation = operatorName;
+        return;
+    }
+
+    if (operation === '') {
+        firstNumber = appendValue(firstNumber, value);
+        updateDisplay(firstNumber);
+    } else {
+        secondNumber = appendValue(secondNumber, value);
+        updateDisplay(secondNumber);
+    }
+}
+
+// button event listeners
+const container = document.querySelector('#buttons-container');
+
+container.addEventListener('click', (event) => {
+    const button = event.target.closest('button');
+    if (!button) return;
+
+    const value = button.textContent.trim();
+    updateCalculatorVariables(value);
+    console.log('Button pressed:', value);
+});
 
